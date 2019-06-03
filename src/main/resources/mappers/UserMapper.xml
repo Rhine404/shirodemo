@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rhine.blog.mapper.UserMapper">
+
+    <resultMap id="userMap" type="UserBean">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <collection property="roles" ofType="RoleBean">
+            <id property="id" column="roleId"/>
+            <result property="name" column="roleName"/>
+            <collection property="permissions" ofType="PermissionBean">
+                <id property="id" column="permissionId"/>
+                <result property="name" column="permissionName"/>
+                <result property="url" column="permissionUrl"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="findByName" parameterType="String" resultType="UserBean">
+      SELECT id, name, password
+        FROM user
+        WHERE NAME = #{name}
+    </select>
+
+    <select id="findById" parameterType="String" resultMap="userMap">
+      SELECT user.id, user.name, user.password,
+			role.id as roleId, role.name as roleName,
+			permission.id as permissionId, permission.name as permissionName, permission.url as permissionUrl
+      FROM user, user_role, role, role_permission, permission
+      WHERE user.id = #{id}
+        AND user.id = user_role.user_id
+        AND user_role.role_id = role.id
+        AND role.id = role_permission.role_id
+        AND role_permission.permission_id = permission.id
+    </select>
+</mapper>
